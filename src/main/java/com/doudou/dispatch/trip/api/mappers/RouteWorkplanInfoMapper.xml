@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.doudou.dispatch.trip.api.mappers.RouteWorkplanInfoMapper">
+
+	<select id="selectRouteWorkplanInfo" resultType="RouteWorkplanInfo">
+		SELECT
+			routeName,
+			type,
+			COUNT(1) AS gpsSize,
+			CAST(FLOOR((COUNT(1) * ${freq}) / 60) AS UNSIGNED) AS runTime
+		FROM
+			routeGpsTemplate
+		GROUP BY
+			routeName,
+			type
+	</select>
+
+</mapper>

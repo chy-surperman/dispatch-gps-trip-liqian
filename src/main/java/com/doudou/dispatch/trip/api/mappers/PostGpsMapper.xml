@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.doudou.dispatch.trip.api.mappers.PostGpsMapper">
+	
+	<insert id="savePostGps">
+		
+		insert into gpsDB.${gpsTableName}(
+			latitude,longitude,speed,vehicleId,createTime,sign
+		)
+		values  
+		<foreach collection="workplanPostGps.gpsLists" item="gpsreport" separator="," index="index">
+			(#{gpsreport.latitude},#{gpsreport.longitude},#{gpsreport.speed},#{gpsreport.vehicleId},#{gpsreport.time},#{gpsreport.sign})
+		</foreach>
+	</insert>
+	
+	<update id="comfirePostGps">
+		update gpsDB.${gpsTableName} set code = null where sign=#{sign}
+	</update>
+	
+	<delete id="cancelPostGps">
+		delete from gpsDB.${gpsTableName} where sign=#{sign}
+	</delete>
+
+	<insert id="moveSlaveGpsInsert">
+		insert into gpsDB.${gpsTableName}(
+			latitude,longitude,speed,vehicleId,createTime,sign
+		) 
+		select 
+			latitude,longitude,speed,vehicleId,createTime,speed,'${sign}' as sign
+		from 
+			slaveGpsDB.${gpsTableName}
+		where 
+			createTime <![CDATA[<]]> #{arrivalTime}
+		and createTime <![CDATA[>]]> #{departureTime}
+		and vehicleId = #{vehicleId}
+		and latitude!='0.0' and longitude!='0.0'
+		order by createTime
+	</insert>
+</mapper>

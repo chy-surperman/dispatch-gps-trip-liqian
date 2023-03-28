@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.doudou.dispatch.trip.api.mappers.GpsreportMapper">
+
+	<select id="selectByRouteNameAndStarttag" resultType="GpsTemplate">
+		select 
+			id,latitude,longitude,speed
+		from
+			routeFences
+		where
+			routeName=#{routeName}
+		and starttag = #{starttag}
+		order by seq
+	</select>
+
+	<select id="selectTime" resultType="gpsreport">
+		select
+			id,latitude,longitude,createTime,speed
+		from
+			gpsDB.${gpsTableName}
+		where
+			createTime <![CDATA[<]]> #{arrivalTime}
+			and createTime <![CDATA[>]]> #{departureTime}
+			and vehicleId = #{vehicleId}
+			and latitude!='0.0' and longitude!='0.0'
+		order by createTime
+	</select>
+
+	<delete id="deleteGps" >
+		delete
+		from
+			gpsDB.${gpsTableName}
+		where
+			createTime <![CDATA[<]]> #{arrivalTime}
+		and createTime <![CDATA[>]]> #{departureTime}
+		and vehicleId = #{vehicleId}
+	</delete>
+
+</mapper>

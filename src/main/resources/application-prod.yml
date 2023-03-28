@@ -1,0 +1,66 @@
+server:
+  port: 8989
+  servlet:
+    context-path: /gpsTrip
+  tomcat:
+    uri-encoding: utf-8
+
+
+spring:
+  application:
+    name: dispatch-gps-trip
+  mvc:
+    view:
+      suffix: .html
+  http:
+    encoding:
+      force: true
+      enabled: true
+      charset: UTF-8
+    multipart:
+      max-file-size: 10MB
+  redis:
+    host: 127.0.0.1
+    port: 6379
+    password: jesse123456
+    database: 0
+    pool:
+      max-active: 5
+      min-idle: 1
+      max-wait: 1000
+      max-idle: 5
+
+druid:
+  datasource:
+    username: root
+    password: 789po.posdou12.QVM
+    driver-class-name: com.mysql.jdbc.Driver
+    type: com.alibaba.druid.pool.DruidDataSource
+    url: jdbc:mysql://192.168.0.32:3306/dispatch?characterEncoding=UTF-8
+    initialSize: 5
+    minIdle: 5
+    maxActive: 10
+    maxWait: 60000
+    timeBetweenEvictionRunsMillis: 60000
+    minEvictableIdleTimeMillis: 30000
+    validationQuery: SELECT 'x'
+    testWhileIdle: true
+    testOnBorrow: false
+    testOnReturn: false
+    poolPreparedStatements: true
+    maxPoolPreparedStatementPerConnectionSize: 5
+
+mybatis:
+  type-aliases-package: com.doudou.dispatch.trip.api.entities,com.dispatch.gps.commons.entities
+  mapper-locations:
+    - classpath:com/doudou/dispatch/trip/api/mappers/*.xml
+
+open:
+  feign:
+    client:
+      default-host: http://121.37.197.248/Dispatch
+      client-type-class: feign.httpclient.ApacheHttpClient
+      encoder-class: feign.gson.GsonEncoder
+      decoder-class: feign.gson.GsonDecoder
+
+

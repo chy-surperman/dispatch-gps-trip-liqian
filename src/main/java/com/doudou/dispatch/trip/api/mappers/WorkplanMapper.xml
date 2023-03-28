@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.doudou.dispatch.trip.api.mappers.WorkplanMapper">
+
+	<sql id="Workplan_Column_List">
+		`date`,`driverId`,`driverName`,`vehicleId`,`plateNum`,`routeName`,`dispatchTime`,`scheduleTime`,`departureTime`,
+		`arrivalTime`,`status`,`starttag`,`siteName`,`late`,`comsuTime`,`spacing`,isAdvanceDeparture,departureWay,arrivalWay,mileage,
+		whetherSwipeDeparture,trip,reportSiteCount,reportSiteRate,isFinishTrip,isThroughUpMonitorSite,
+		isThroughDownMonitorSite,hasNextWorkplan,gpsSign
+	</sql>
+
+	<sql id="Workplan_set_List">
+		<set>
+			<if test="date != null"> `date` = #{date},</if>
+			<if test="driverId != null and driverId != ''"> `driverId` = #{driverId},</if>
+			<if test="driverName != null and driverName != ''"> `driverName` = #{driverName},</if>
+			<if test="vehicleId != null and vehicleId != ''"> `vehicleId` = #{vehicleId},</if>
+			<if test="plateNum != null and plateNum != ''"> `plateNum` = #{plateNum},</if>
+			<if test="routeName != null and routeName != ''"> `routeName` = #{routeName},</if>
+			<if test="scheduleTime != null"> `scheduleTime` = #{scheduleTime},</if>
+			<if test="departureTime != null"> `departureTime` = #{departureTime},</if>
+			<if test="arrivalTime != null"> `arrivalTime` = #{arrivalTime},</if>
+			<if test="status != null and status != ''"> `status` = #{status},</if>
+			<if test="isAdvanceDeparture != null and isAdvanceDeparture != ''"> isAdvanceDeparture = #{isAdvanceDeparture},</if>
+			<if test="departureWay != null and departureWay != ''"> departureWay = #{departureWay},</if>
+			<if test="arrivalWay != null and arrivalWay != ''"> arrivalWay = #{arrivalWay},</if>
+			<if test="siteName != null and siteName != ''"> `siteName` = #{siteName},</if>
+			<if test="starttag != null and starttag != ''"> `starttag` = #{starttag},</if>
+			<if test="late != null and late != ''">`late` = #{late},</if>
+			<if test="comsuTime != null and comsuTime != ''">`comsuTime` = #{comsuTime},</if>
+			<if test="gpsSign != null and gpsSign != ''">`gpsSign` = #{gpsSign},</if>
+			<if test="mileage != null and mileage != ''">`mileage` = #{mileage},</if>
+			<if test="reportSiteCount != null and reportSiteCount != ''">`reportSiteCount` = #{reportSiteCount},</if>
+			<if test="reportSiteRate != null and reportSiteRate != ''">`reportSiteRate` = #{reportSiteRate},</if>
+			<if test="isFinishTrip != null and isFinishTrip != ''">`isFinishTrip` = #{isFinishTrip},</if>
+			<if test="isThroughUpMonitorSite != null and isThroughUpMonitorSite != ''">`isThroughUpMonitorSite` = #{isThroughUpMonitorSite},</if>
+			<if test="spacing != null and spacing != ''">`spacing` = #{spacing}</if>
+		</set>
+	</sql>
+
+	<insert id="insert" parameterType="CreateWorkplan" >
+		<selectKey keyColumn="id" keyProperty="id" order="AFTER" resultType="long">
+			select LAST_INSERT_ID()
+		</selectKey>
+		insert into dispatch.workplan(<include refid="Workplan_Column_List"></include>) values(#{date},#{driverId},#{driverName},#{vehicleId},
+		#{plateNum},#{routeName},#{dispatchTime},#{scheduleTime},#{departureTime},#{arrivalTime},#{status},#{starttag},#{siteName},
+		#{late},#{comsuTime},#{spacing},#{isAdvanceDeparture},#{departureWay},#{arrivalWay},#{mileage},#{whetherSwipeDeparture},#{tripValue},
+		#{reportSiteCount},#{reportSiteRate},#{isFinishTrip},#{isThroughUpMonitorSite},
+		#{isThroughDownMonitorSite},#{hasNextWorkplan},#{gpsSign})
+	</insert>
+
+	<update id="update" parameterType="CreateWorkplan" >
+		update dispatch.workplan <include refid="Workplan_set_List"></include> where `id` = #{id}
+	</update>
+
+	<select id="selectByQueryWorkplan" resultType="Workplan">
+		select
+			A.id,
+			A.date,
+			A.driverId,
+			A.driverName,
+			A.vehicleId,
+			A.plateNum,
+			A.routeName,
+			A.dispatchTime,
+			A.scheduleTime,
+			A.departureTime,
+			A.arrivalTime,
+			FROM_UNIXTIME(UNIX_TIMESTAMP(A.departureTime),'%H:%i:%S') as departureString,
+			FROM_UNIXTIME(UNIX_TIMESTAMP(A.scheduleTime),'%H:%i:%S') as scheduleString,
+			FROM_UNIXTIME(UNIX_TIMESTAMP(A.arrivalTime),'%H:%i:%S') as arrivalString,
+			A.status,
+			A.starttag,
+			A.siteName,
+			A.late,
+			A.trip,
+			A.comsuTime,
+			B.selfNum,
+			A.spacing,
+			A.mileage,
+			A.reportSiteCount,
+			A.isThroughUpMonitorSite,
+			A.isThroughDownMonitorSite,
+			A.whetherSwipeDeparture,
+			A.hasNextWorkplan
+		from
+			dispatch.workplan A left join dispatch.vehicle B on A.vehicleId = B.vehicleId
+		where
+			A.`date`=#{queryWorkplan.date}
+		and A.routeName=#{queryWorkplan.routeName}
+		<if test="queryWorkplan.vehicleId != null and queryWorkplan.vehicleId != ''">
+			and A.vehicleId=#{queryWorkplan.vehicleId}
+		</if>
+		<if test="queryWorkplan.driverId != null and queryWorkplan.driverId != ''">
+			and A.driverId=#{queryWorkplan.driverId}
+		</if>
+		order by A.scheduleTime
+	</select>
+
+	<select id="selectDriverWorkplans" resultType="Workplan">
+		select
+			A.id,
+			A.date,
+			A.driverId,
+			A.driverName,
+			A.vehicleId,
+			A.plateNum,
+			A.routeName,
+			A.dispatchTime,
+			A.scheduleTime,
+			A.departureTime,
+			A.arrivalTime,
+			A.status,
+			A.starttag,
+			A.siteName,
+			A.late,
+			A.trip,
+			A.comsuTime,
+			B.selfNum,
+			B.swipeCode,
+			A.spacing,
+			A.mileage,
+			A.isThroughUpMonitorSite,
+			A.isThroughDownMonitorSite,
+			A.whetherSwipeDeparture,
+			A.hasNextWorkplan
+		from dispatch.workplan A left join dispatch.vehicle B on A.vehicleId = B.vehicleId
+		where 1=1
+		and (A.`status`<![CDATA[<]]>'3' or A.`status` is null )
+		and A.driverId = #{driverId}
+		and A.date = #{date}
+		order by  A.scheduleTime
+	</select>
+
+	<select id="selectById" parameterType="long" resultType="CreateWorkplan">
+		select id,<include refid="Workplan_Column_List"></include> from dispatch.workplan where id=#{value}
+	</select>
+
+	<delete id="deleteById" parameterType="long">
+		delete from dispatch.workplan where id=#{value}
+	</delete>
+
+	<select id="selectWorkplanVehicles" resultType="TVehicle">
+		SELECT
+			A.vehicleId,
+			A.plateNum,
+			A.routeName,
+			A.selfNum
+		FROM
+			vehicle A
+		RIGHT JOIN (
+			SELECT
+				vehicleId,
+				plateNum
+			FROM
+				workplan
+			WHERE
+				routeName=#{routeName}
+			and date=#{date}
+			GROUP BY vehicleId,plateNum
+		) B ON A.vehicleId = B.vehicleId
+	</select>
+
+	<select id="selectBigDailyWorkplanReport" resultType="BigDailyWorkplan">
+		select
+			A.driverName,
+			A.plateNum,
+			A.routeName,
+			FROM_UNIXTIME(UNIX_TIMESTAMP(A.departureTime),'%H:%i:%S') as departureString,
+			FROM_UNIXTIME(UNIX_TIMESTAMP(A.arrivalTime),'%H:%i:%S') as arrivalString,
+			A.status,
+			A.starttag,
+			A.departureWay,
+			A.arrivalWay,
+			B.selfNum,
+			A.isThroughUpMonitorSite
+		from
+			dispatch.workplan A left join vehicle B on A.vehicleId = B.vehicleId
+		where
+			A.status in ('1','2')
+			<if test="isThroughMonitorSite != null and isThroughMonitorSite != ''">
+				AND A.isThroughUpMonitorSite = 1
+			</if>
+		and A.routeName=#{routeName}
+		and A.date=#{date}
+		order by A.scheduleTime
+	</select>
+
+</mapper>

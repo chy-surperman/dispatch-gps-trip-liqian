@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.doudou.dispatch.trip.api.mappers.LineInfoMapper">
+<!--	routeName,
+			DATE_FORMAT(startTime,'%H:%i:%s') as startTime,
+			DATE_FORMAT(endTime,'%H:%i:%s') as endTime,
+			driverTrip / 2 as driverTrip,
+			gpsFreq,
+			upDistance as routeDistance-->
+	<select id="selectLineInfo" resultType="LineInfo">
+		SELECT
+		*
+		FROM
+			routeMsg
+		WHERE
+			startTime IS NOT NULL
+	</select>
+
+</mapper>

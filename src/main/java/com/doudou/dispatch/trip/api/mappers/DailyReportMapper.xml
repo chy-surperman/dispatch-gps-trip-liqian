@@ -1,0 +1,324 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.doudou.dispatch.trip.api.mappers.DailyReportMapper">
+	
+	<select id="selectBigDailyWorkplanReport" resultType="BigDailyWorkplan">
+		select 
+			A.driverName,
+			A.plateNum,
+			A.routeName,
+			FROM_UNIXTIME(UNIX_TIMESTAMP(A.departureTime),'%H:%i:%S') as departureString,
+			FROM_UNIXTIME(UNIX_TIMESTAMP(A.arrivalTime),'%H:%i:%S') as arrivalString,
+			A.status,
+			A.starttag,
+			A.departureWay,
+			A.arrivalWay,
+			B.selfNum,
+			A.isThroughUpMonitorSite
+		from workplan_2016 A left join vehicle B on A.vehicleId = B.vehicleId
+		where 
+			A.status in ('1','2')
+			<if test="isThroughMonitorSite != null and isThroughMonitorSite != ''">
+				AND A.isThroughUpMonitorSite = 1
+			</if>
+			and A.routeName=#{routeName} 
+			and A.date=#{date}
+		order by A.scheduleTime
+	</select>
+	
+	<select id="selectDriverTrips" resultType="DriverTrip">		
+		SELECT 
+			A.driverName as 'driverName',
+			SUM(IF(DAY(date) = 1,1,0)) as 'v1',
+			SUM(IF(DAY(date) = 2,1,0)) as 'v2',
+			SUM(IF(DAY(date) = 3,1,0)) as 'v3',
+			SUM(IF(DAY(date) = 4,1,0)) as 'v4',
+			SUM(IF(DAY(date) = 5,1,0)) as 'v5',
+			SUM(IF(DAY(date) = 6,1,0)) as 'v6',
+			SUM(IF(DAY(date) = 7,1,0)) as 'v7',
+			SUM(IF(DAY(date) = 8,1,0)) as 'v8',
+			SUM(IF(DAY(date) = 9,1,0)) as 'v9',
+			SUM(IF(DAY(date) = 10,1,0)) as 'v10',
+			SUM(IF(DAY(date) = 11,1,0)) as 'v11',
+			SUM(IF(DAY(date) = 12,1,0)) as 'v12',
+			SUM(IF(DAY(date) = 13,1,0)) as 'v13',
+			SUM(IF(DAY(date) = 14,1,0)) as 'v14',
+			SUM(IF(DAY(date) = 15,1,0)) as 'v15',
+			SUM(IF(DAY(date) = 16,1,0)) as 'v16',
+			SUM(IF(DAY(date) = 17,1,0)) as 'v17',
+			SUM(IF(DAY(date) = 18,1,0)) as 'v18',
+			SUM(IF(DAY(date) = 19,1,0)) as 'v19',
+			SUM(IF(DAY(date) = 20,1,0)) as 'v20',
+			SUM(IF(DAY(date) = 21,1,0)) as 'v21',
+			SUM(IF(DAY(date) = 22,1,0)) as 'v22',
+			SUM(IF(DAY(date) = 23,1,0)) as 'v23',
+			SUM(IF(DAY(date) = 24,1,0)) as 'v24',
+			SUM(IF(DAY(date) = 25,1,0)) as 'v25',
+			SUM(IF(DAY(date) = 26,1,0)) as 'v26',
+			SUM(IF(DAY(date) = 27,1,0)) as 'v27',
+			SUM(IF(DAY(date) = 28,1,0)) as 'v28',
+			SUM(IF(DAY(date) = 29,1,0)) as 'v29',
+			SUM(IF(DAY(date) = 30,1,0)) as 'v30',
+			SUM(IF(DAY(date) = 31,1,0)) as 'v31',
+			COUNT(1) as 'tripCount',
+			ROUND(SUM(mileage) / 1000,2) as 'totalMileage'
+		from workplan_2016 A
+		WHERE
+			routeName = #{routeName}
+		AND status='2' 
+		<if test='statisticsType == "2"'>
+			and isFinishTrip = 2
+		</if>
+		AND date <![CDATA[>=]]> #{startDate}
+		AND date <![CDATA[<=]]> #{endDate} 
+		AND isThroughUpMonitorSite=1
+		GROUP BY
+			A.driverName
+	</select>
+	
+	<select id="selectTripDay" resultType="DriverTrip">		
+		SELECT
+			'合计' as 'driverName',
+			date,
+			COUNT(1) as 'tripCount'
+		FROM
+			workplan_2016
+		WHERE
+			routeName = #{routeName}
+		AND date <![CDATA[>=]]> #{startDate}
+		AND date <![CDATA[<=]]> #{endDate}
+		AND status='2' 
+		GROUP BY
+			date
+	</select>
+	
+	<select id="selectTripDetailCount" resultType="int">
+		SELECT 
+			COUNT(1)
+		FROM 
+			(
+			SELECT
+				COUNT(1) as 'tripCount'
+			FROM
+				workplan_2016 A LEFT JOIN vehicle B ON A.vehicleId = B.vehicleId
+			WHERE
+				A.routeName = #{routeName}
+			<if test='statisticsType == "2"'>
+				and A.isFinishTrip = 2
+			</if>
+			AND A.date <![CDATA[>=]]> #{startDate}
+			AND A.date <![CDATA[<=]]> #{endDate}
+			AND A.status='2' 
+			GROUP BY
+				A.driverName,
+				B.selfNum
+		) A
+	</select>
+	
+	<select id="selectTripDetail" resultType="DriverTrip">
+		SELECT 
+			A.driverName as 'driverName',
+			B.selfNum,
+			SUM(IF(DAY(date) = 1,1,0)) as 'v1',
+			SUM(IF(DAY(date) = 2,1,0)) as 'v2',
+			SUM(IF(DAY(date) = 3,1,0)) as 'v3',
+			SUM(IF(DAY(date) = 4,1,0)) as 'v4',
+			SUM(IF(DAY(date) = 5,1,0)) as 'v5',
+			SUM(IF(DAY(date) = 6,1,0)) as 'v6',
+			SUM(IF(DAY(date) = 7,1,0)) as 'v7',
+			SUM(IF(DAY(date) = 8,1,0)) as 'v8',
+			SUM(IF(DAY(date) = 9,1,0)) as 'v9',
+			SUM(IF(DAY(date) = 10,1,0)) as 'v10',
+			SUM(IF(DAY(date) = 11,1,0)) as 'v11',
+			SUM(IF(DAY(date) = 12,1,0)) as 'v12',
+			SUM(IF(DAY(date) = 13,1,0)) as 'v13',
+			SUM(IF(DAY(date) = 14,1,0)) as 'v14',
+			SUM(IF(DAY(date) = 15,1,0)) as 'v15',
+			SUM(IF(DAY(date) = 16,1,0)) as 'v16',
+			SUM(IF(DAY(date) = 17,1,0)) as 'v17',
+			SUM(IF(DAY(date) = 18,1,0)) as 'v18',
+			SUM(IF(DAY(date) = 19,1,0)) as 'v19',
+			SUM(IF(DAY(date) = 20,1,0)) as 'v20',
+			SUM(IF(DAY(date) = 21,1,0)) as 'v21',
+			SUM(IF(DAY(date) = 22,1,0)) as 'v22',
+			SUM(IF(DAY(date) = 23,1,0)) as 'v23',
+			SUM(IF(DAY(date) = 24,1,0)) as 'v24',
+			SUM(IF(DAY(date) = 25,1,0)) as 'v25',
+			SUM(IF(DAY(date) = 26,1,0)) as 'v26',
+			SUM(IF(DAY(date) = 27,1,0)) as 'v27',
+			SUM(IF(DAY(date) = 28,1,0)) as 'v28',
+			SUM(IF(DAY(date) = 29,1,0)) as 'v29',
+			SUM(IF(DAY(date) = 30,1,0)) as 'v30',
+			SUM(IF(DAY(date) = 31,1,0)) as 'v31',
+			COUNT(1) as 'tripCount'
+		FROM
+			workplan_2016 A LEFT JOIN vehicle B ON A.vehicleId = B.vehicleId
+		WHERE
+			A.routeName = #{routeName}
+		<if test='statisticsType == "2"'>
+			and A.isFinishTrip = 2
+		</if>
+		AND A.date <![CDATA[>=]]> #{startDate}
+		AND A.date <![CDATA[<=]]> #{endDate}
+		AND A.status='2' 
+		AND A.isThroughUpMonitorSite=1
+		GROUP BY
+			A.driverName,
+			B.selfNum
+		ORDER BY A.driverName 
+		limit #{start},#{pageSize}
+	</select>
+	
+	<select id="selectVehicleTripAndMileage" resultType="DriverTrip">
+		SELECT 
+			B.selfNum as 'selfNum',
+			SUM(IF(DAY(date) = 1,1,0)) as 'v1',
+			SUM(IF(DAY(date) = 2,1,0)) as 'v2',
+			SUM(IF(DAY(date) = 3,1,0)) as 'v3',
+			SUM(IF(DAY(date) = 4,1,0)) as 'v4',
+			SUM(IF(DAY(date) = 5,1,0)) as 'v5',
+			SUM(IF(DAY(date) = 6,1,0)) as 'v6',
+			SUM(IF(DAY(date) = 7,1,0)) as 'v7',
+			SUM(IF(DAY(date) = 8,1,0)) as 'v8',
+			SUM(IF(DAY(date) = 9,1,0)) as 'v9',
+			SUM(IF(DAY(date) = 10,1,0)) as 'v10',
+			SUM(IF(DAY(date) = 11,1,0)) as 'v11',
+			SUM(IF(DAY(date) = 12,1,0)) as 'v12',
+			SUM(IF(DAY(date) = 13,1,0)) as 'v13',
+			SUM(IF(DAY(date) = 14,1,0)) as 'v14',
+			SUM(IF(DAY(date) = 15,1,0)) as 'v15',
+			SUM(IF(DAY(date) = 16,1,0)) as 'v16',
+			SUM(IF(DAY(date) = 17,1,0)) as 'v17',
+			SUM(IF(DAY(date) = 18,1,0)) as 'v18',
+			SUM(IF(DAY(date) = 19,1,0)) as 'v19',
+			SUM(IF(DAY(date) = 20,1,0)) as 'v20',
+			SUM(IF(DAY(date) = 21,1,0)) as 'v21',
+			SUM(IF(DAY(date) = 22,1,0)) as 'v22',
+			SUM(IF(DAY(date) = 23,1,0)) as 'v23',
+			SUM(IF(DAY(date) = 24,1,0)) as 'v24',
+			SUM(IF(DAY(date) = 25,1,0)) as 'v25',
+			SUM(IF(DAY(date) = 26,1,0)) as 'v26',
+			SUM(IF(DAY(date) = 27,1,0)) as 'v27',
+			SUM(IF(DAY(date) = 28,1,0)) as 'v28',
+			SUM(IF(DAY(date) = 29,1,0)) as 'v29',
+			SUM(IF(DAY(date) = 30,1,0)) as 'v30',
+			SUM(IF(DAY(date) = 31,1,0)) as 'v31',
+			COUNT(1) as 'tripCount',
+			CONVERT(SUM(A.mileage) / 1000, DECIMAL(12,2)) as 'totalMileage'
+		from workplan_2016 A LEFT JOIN vehicle B ON A.vehicleId = B.vehicleId
+		WHERE
+			A.routeName = #{routeName}
+		<if test='statisticsType == "2"'>
+			and A.isFinishTrip = 2
+		</if>
+		AND A.date <![CDATA[>=]]> #{startDate}
+		AND A.date <![CDATA[<=]]> #{endDate}
+		AND A.status='2' 
+		AND A.isThroughUpMonitorSite=1
+		GROUP BY
+			B.selfNum
+		order by B.selfNum 
+		limit #{start},#{pageSize}
+	</select>
+	
+	<select id="selectTotalVehicleTripAndMileage" resultType="DriverTrip">
+		SELECT 
+			'合计' as 'selfNum',
+			SUM(IF(DAY(date) = 1,1,0)) as 'v1',
+			SUM(IF(DAY(date) = 2,1,0)) as 'v2',
+			SUM(IF(DAY(date) = 3,1,0)) as 'v3',
+			SUM(IF(DAY(date) = 4,1,0)) as 'v4',
+			SUM(IF(DAY(date) = 5,1,0)) as 'v5',
+			SUM(IF(DAY(date) = 6,1,0)) as 'v6',
+			SUM(IF(DAY(date) = 7,1,0)) as 'v7',
+			SUM(IF(DAY(date) = 8,1,0)) as 'v8',
+			SUM(IF(DAY(date) = 9,1,0)) as 'v9',
+			SUM(IF(DAY(date) = 10,1,0)) as 'v10',
+			SUM(IF(DAY(date) = 11,1,0)) as 'v11',
+			SUM(IF(DAY(date) = 12,1,0)) as 'v12',
+			SUM(IF(DAY(date) = 13,1,0)) as 'v13',
+			SUM(IF(DAY(date) = 14,1,0)) as 'v14',
+			SUM(IF(DAY(date) = 15,1,0)) as 'v15',
+			SUM(IF(DAY(date) = 16,1,0)) as 'v16',
+			SUM(IF(DAY(date) = 17,1,0)) as 'v17',
+			SUM(IF(DAY(date) = 18,1,0)) as 'v18',
+			SUM(IF(DAY(date) = 19,1,0)) as 'v19',
+			SUM(IF(DAY(date) = 20,1,0)) as 'v20',
+			SUM(IF(DAY(date) = 21,1,0)) as 'v21',
+			SUM(IF(DAY(date) = 22,1,0)) as 'v22',
+			SUM(IF(DAY(date) = 23,1,0)) as 'v23',
+			SUM(IF(DAY(date) = 24,1,0)) as 'v24',
+			SUM(IF(DAY(date) = 25,1,0)) as 'v25',
+			SUM(IF(DAY(date) = 26,1,0)) as 'v26',
+			SUM(IF(DAY(date) = 27,1,0)) as 'v27',
+			SUM(IF(DAY(date) = 28,1,0)) as 'v28',
+			SUM(IF(DAY(date) = 29,1,0)) as 'v29',
+			SUM(IF(DAY(date) = 30,1,0)) as 'v30',
+			SUM(IF(DAY(date) = 31,1,0)) as 'v31',
+			COUNT(1) as 'tripCount',
+			CONVERT(SUM(A.mileage) / 1000, DECIMAL(12,2)) as 'totalMileage'
+		from workplan_2016 A LEFT JOIN vehicle B ON A.vehicleId = B.vehicleId
+		WHERE
+			A.routeName = #{routeName}
+		<if test='statisticsType == "2"'>
+			and A.isFinishTrip = 2
+		</if>
+		AND A.date <![CDATA[>=]]> #{startDate}
+		AND A.date <![CDATA[<=]]> #{endDate}
+		AND A.status='2'
+		AND A.isThroughUpMonitorSite=1
+	</select>
+	
+	<select id="selectVehicleTripAndMileageCount" resultType="int">
+		SELECT
+			COUNT(DISTINCT A.vehicleId)
+		FROM
+			workplan_2016 A
+		WHERE
+			A.routeName = #{routeName}
+		<if test='statisticsType == "2"'>
+			and A.isFinishTrip = 2
+		</if>
+		AND A.date <![CDATA[>=]]> #{startDate}
+		AND A.date <![CDATA[<=]]> #{endDate}
+		AND A.status='2' 
+		AND A.isThroughUpMonitorSite=1
+	</select>
+	
+	<select id="selectDriverWorkplanStatics" resultType="Workplan">
+		SELECT
+			date,
+			routeName,
+			driverName,
+			COUNT(1) AS 'trip'
+		FROM
+			workplan_2016
+		WHERE
+			driverId = #{driverId}
+		AND date <![CDATA[>=]]> #{startDate}
+		AND date <![CDATA[<=]]> #{endDate}
+		AND `status` = '2'
+		AND isThroughUpMonitorSite = 1
+		GROUP BY
+			date,
+			routeName,
+			driverName
+		ORDER BY date DESC
+	</select>
+	
+	<select id="selectRouteWorkplanStatics" resultType="Workplan">
+		SELECT
+			A.driverName,A.driverId,B.selfNum,A.plateNum,COUNT(1) as trip
+		FROM
+			workplan_2016 A
+		LEFT JOIN vehicle B ON A.vehicleId = B.vehicleId
+		WHERE
+			A.routeName = #{routeName}
+		AND date = #{date}
+		AND A.`status` = '2'
+		AND isThroughUpMonitorSite = 1
+		GROUP BY A.driverName,A.driverId,B.selfNum,A.plateNum
+	</select>
+</mapper>

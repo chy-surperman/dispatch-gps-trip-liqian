@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.doudou.dispatch.trip.api.mappers.VehicleMileageMapper">
+
+    <select id="selectVehicleMileage" resultType="VehicleMileage">
+        SELECT
+            A.selfNum,
+            A.vehicleId,
+            A.plateNum,
+            A.operationMileage,
+            B.mileageTotal
+        FROM
+            (
+            SELECT
+                D.selfNum,C.vehicleId,C.plateNum,SUM(mileage / 1000) as operationMileage
+            FROM
+                workplan C LEFT JOIN vehicle D on C.vehicleId = D.vehicleId
+            WHERE
+                date <![CDATA[>=]]> #{startDate}
+            AND date <![CDATA[<=]]> #{endDate}
+            AND C.routeName = #{routeName}
+            and C.`status`='2'
+            and isThroughUpMonitorSite=1
+            GROUP BY
+                D.selfNum,C.vehicleId,C.plateNum
+            )	A LEFT JOIN (
+            SELECT
+                vehicleId,
+                SUM(mileageTotal / 1000) AS mileageTotal
+            FROM
+                vehicleMileage
+            WHERE
+                workdate <![CDATA[>=]]> #{startDate}
+            AND workdate <![CDATA[<=]]> #{endDate}
+            GROUP BY
+                vehicleId
+        ) B on A.vehicleId = B.vehicleId
+
+    </select>
+
+</mapper>

@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.doudou.dispatch.trip.api.mappers.BaseDataMapper">
+	
+	<select id="selectRouteNames" resultType="String">
+		select 
+			routeName
+		from routeMsg
+		where
+			company=#{company}
+	</select>
+
+	<select id="selectCsCityDriver" resultType="Driver">
+		select
+			driverName,driverId,routeName
+		from
+			driver
+	</select>
+
+	<select id="selectCsCityVehicle" resultType="TVehicle">
+		select
+			vehicleId,plateNum,routeName,selfNum
+		from
+			vehicle where reportOilCompany in ('通畅巴士','宝骏巴士','星通公交')
+	</select>
+
+	<select id="selectRepeatDriver" resultType="String">
+		SELECT driverName from driver GROUP BY driverName HAVING COUNT(1) > 1
+	</select>
+
+	<select id="selectDriverByName" resultType="Driver">
+		select
+			id,driverName,driverId,routeName
+		from driver
+		where
+			driverName=#{driverName}
+	</select>
+
+	<delete id="deleteById">
+		delete from driver where id=#{id}
+	</delete>
+
+	<update id="updateWorkplan">
+		UPDATE workplan set driverId=#{newDriverId} where driverId=#{driverId} and date <![CDATA[<=]]> '2020-07-01'
+	</update>
+</mapper>
