@@ -1,2 +1,5 @@
 # Project exclude paths
 /target/
+/dispatch-gps-trip.iml
+/readme.md
+/src/main/java/resources/static

@@ -9,6 +9,7 @@ import com.dispatch.gps.commons.utils.DateUtil;
 import com.dispatch.gps.commons.utils.GPSUtil;
 import com.doudou.dispatch.trip.api.entities.GpsCoordHistroy;
 import com.doudou.dispatch.trip.api.feigns.GpsFeignClient;
+import com.doudou.dispatch.trip.api.feigns.WorkplanGpsFeignClient;
 import com.doudou.dispatch.trip.api.services.PostGpsService;
 import com.doudou.dispatch.trip.api.services.QueryGpsService;
 import lombok.extern.slf4j.Slf4j;
@@ -18,6 +19,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
@@ -34,6 +38,9 @@ public class GpsController {
 
     @Autowired
     private QueryGpsService queryGpsService;
+
+    @Autowired
+    private WorkplanGpsFeignClient workplanGpsFeignClient;
 
     @RequestMapping("/locus")
     public JsonResult getVehicleLocusMapGps(String routeName,String startTime, String endTime, String vehicleId) {
@@ -105,4 +112,13 @@ public class GpsController {
         }
         return jsonResult;
     }
+
+    @RequestMapping("/deleteGpsData")
+    public JsonResult deleteGpsData(String startTime, String endTime, String vehicleId) throws ParseException {
+        Date date = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(startTime);
+        String gpsTableName = "gpsreport_"+DateUtil.getDateByDs(date, DateStyle.YYYYMMDD);
+        JsonResult jsonResult = workplanGpsFeignClient.deleteGps(startTime, endTime, vehicleId,gpsTableName);
+        return jsonResult;
+    }
+
 }
