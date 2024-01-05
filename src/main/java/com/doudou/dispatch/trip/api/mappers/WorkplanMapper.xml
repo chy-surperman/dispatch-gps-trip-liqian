@@ -7,7 +7,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 	<sql id="Workplan_Column_List">
 		`date`,`driverId`,`driverName`,`vehicleId`,`plateNum`,`routeName`,`dispatchTime`,`scheduleTime`,`departureTime`,
 		`arrivalTime`,`status`,`starttag`,`siteName`,`late`,`comsuTime`,`spacing`,isAdvanceDeparture,departureWay,arrivalWay,mileage,
-		whetherSwipeDeparture,trip,reportSiteCount,reportSiteRate,isFinishTrip,isThroughUpMonitorSite,
+		whetherSwipeDeparture,tripValue,reportSiteCount,reportSiteRate,isFinishTrip,isThroughUpMonitorSite,
 		isThroughDownMonitorSite,hasNextWorkplan,gpsSign
 	</sql>
 

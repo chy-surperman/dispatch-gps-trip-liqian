@@ -260,7 +260,7 @@ public class DBWorkplanServiceImpl implements WorkplanService {
             associationWorkplan.setArrivalWay(Consts.ARRIVAL_WAY_MANUAL);
             associationWorkplan.setIsThroughUpMonitorSite(1);
             associationWorkplan.setIsThroughDownMonitorSite(1);
-
+            associationWorkplan.setTripValue(Float.valueOf("0.5"));
 
             if (workplanMapper.insert(associationWorkplan) < 1) {
                 throw new Exception("添加失败");

@@ -121,4 +121,23 @@ public class GpsController {
         return jsonResult;
     }
 
+
+    @RequestMapping("/calcVehicleMeleage")
+    public JsonResult calcVehicleMeleageMethon(String workdate, String vehicleId) throws ParseException {
+         if (StringUtils.isEmpty(workdate)){
+             return  JsonResult.fail("请选择时间");
+         }
+        if (StringUtils.isEmpty(vehicleId)){
+            return  JsonResult.fail("请选择车辆");
+        }
+        JsonResult jsonResult1 = workplanGpsFeignClient.calcVehicleMeleageMethon(workdate, vehicleId);
+//        Date date = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(startTime);
+//        String gpsTableName = "gpsreport_"+DateUtil.getDateByDs(date, DateStyle.YYYYMMDD);
+//        JsonResult jsonResult = workplanGpsFeignClient.deleteGps(startTime, endTime, vehicleId,gpsTableName);
+        double parseDouble = Double.parseDouble(jsonResult1.getResult().toString());
+        System.out.println(parseDouble);
+        return JsonResult.success(parseDouble*1.095/1000);
+    }
+
+
 }

@@ -313,6 +313,7 @@ public class WorkplanController {
             workplan.setDepartureTime(workplan.getScheduleTime());
             workplan.setIsThroughUpMonitorSite(1);
             workplan.setDispatchTime(workplan.getScheduleTime());
+            workplan.setTripValue(Float.valueOf("0.5"));
         } catch (ParseException e1) {
             e1.printStackTrace();
             return jsonResult.setDefine("时间格式错误");

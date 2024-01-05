@@ -46,4 +46,13 @@ public interface WorkplanGpsFeignClient {
                                 @Param("endTime") String endTime,
                                 @Param("vehicleId") String vehicleId,
                                 @Param("gpsTableName") String gpsTableName );
+
+
+    @RequestLine("GET /gps/calMileage?workdate={workdate}&vehicleId={vehicleId}")
+    @Headers({
+            "AccessSource: wechat"
+    })
+    public JsonResult calcVehicleMeleageMethon(@Param("workdate") String workdate,
+                                @Param("vehicleId") String vehicleId
+                                );
 }
