@@ -9,4 +9,15 @@ public class QueryWorkplan {
     private String routeName;
     private String vehicleId;
     private String driverId;
+
+    public QueryWorkplan() {
+    }
+
+    public QueryWorkplan(String date, String routeName, String vehicleId) {
+        this.date = date;
+        this.routeName = routeName;
+        this.vehicleId = vehicleId;
+    }
+
+
 }

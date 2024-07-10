@@ -90,6 +90,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 		where
 			A.`date`=#{queryWorkplan.date}
 		and A.routeName=#{queryWorkplan.routeName}
+		and A.status in ('1','2')
 		<if test="queryWorkplan.vehicleId != null and queryWorkplan.vehicleId != ''">
 			and A.vehicleId=#{queryWorkplan.vehicleId}
 		</if>
